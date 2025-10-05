@@ -1,6 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const { faker, fakerEN_US, fakerDE, fakerUK } = require('@faker-js/faker');
+const dotenv =  require('dotenv');
+dotenv.config();
+
 
 const app = express();
 app.use(cors());
