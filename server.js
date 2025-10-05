@@ -1,24 +1,24 @@
 const express = require('express');
 const cors = require('cors');
-const { faker } = require('@faker-js/faker');
+const { faker, fakerEN_US, fakerDE, fakerUK } = require('@faker-js/faker');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-// Locale mapping
-const LOCALES = {
-  'en-US': 'en_US',
-  'de-DE': 'de',
-  'uk-UA': 'uk'
+// Locale mapping to faker instances
+const FAKER_LOCALES = {
+  'en-US': fakerEN_US,
+  'de-DE': fakerDE,
+  'uk-UA': fakerUK
 };
 
 // Genre lists by locale
 const GENRES = {
-  'en_US': ['Rock', 'Pop', 'Jazz', 'Blues', 'Hip Hop', 'Electronic', 'Country', 'R&B', 'Metal', 'Folk', 'Indie', 'Classical'],
-  'de': ['Rock', 'Pop', 'Schlager', 'Techno', 'Metal', 'Jazz', 'Volksmusik', 'Hip Hop', 'Punk', 'Electronic', 'Klassik', 'Indie'],
-  'uk': ['Рок', 'Поп', 'Джаз', 'Блюз', 'Хіп-хоп', 'Електронна', 'Фольк', 'Метал', 'Інді', 'Класична', 'Реп', 'Панк']
+  'en-US': ['Rock', 'Pop', 'Jazz', 'Blues', 'Hip Hop', 'Electronic', 'Country', 'R&B', 'Metal', 'Folk', 'Indie', 'Classical'],
+  'de-DE': ['Rock', 'Pop', 'Schlager', 'Techno', 'Metal', 'Jazz', 'Volksmusik', 'Hip Hop', 'Punk', 'Electronic', 'Klassik', 'Indie'],
+  'uk-UA': ['Рок', 'Поп', 'Джаз', 'Блюз', 'Хіп-хоп', 'Електронна', 'Фольк', 'Метал', 'Інді', 'Класична', 'Реп', 'Панк']
 };
 
 // Seeded random number generator (Mulberry32)
@@ -38,8 +38,7 @@ function combineSeed(userSeed, pageNumber) {
 
 // Generate songs for a page
 function generateSongs(locale, seed, page, pageSize, avgLikes) {
-  const fakerLocale = LOCALES[locale] || 'en_US';
-  faker.locale = fakerLocale;
+  const fakerInstance = FAKER_LOCALES[locale] || fakerEN_US;
   
   const combinedSeed = Number(combineSeed(seed, page) & 0xFFFFFFFFn);
   const rng = createSeededRandom(combinedSeed);
@@ -52,27 +51,27 @@ function generateSongs(locale, seed, page, pageSize, avgLikes) {
     
     // Generate song data based on seed + index
     const itemSeed = combinedSeed + i;
-    faker.seed(itemSeed);
+    fakerInstance.seed(itemSeed);
     
     // Generate song title
     const titleWords = rng() > 0.5 ? 2 : 3;
     let title = '';
     for (let j = 0; j < titleWords; j++) {
       if (j > 0) title += ' ';
-      title += faker.word.adjective().charAt(0).toUpperCase() + faker.word.adjective().slice(1);
+      title += fakerInstance.word.adjective().charAt(0).toUpperCase() + fakerInstance.word.adjective().slice(1);
     }
     
     // Generate artist (50% chance of band name vs personal name)
     const artist = rng() > 0.5 
-      ? faker.company.name().split(' ').slice(0, 2).join(' ')
-      : faker.person.fullName();
+      ? fakerInstance.company.name().split(' ').slice(0, 2).join(' ')
+      : fakerInstance.person.fullName();
     
     // Generate album (70% chance of album, 30% single)
     const isSingle = rng() > 0.7;
-    const album = isSingle ? 'Single' : faker.commerce.productName();
+    const album = isSingle ? 'Single' : fakerInstance.commerce.productName();
     
     // Generate genre
-    const genreList = GENRES[fakerLocale] || GENRES['en_US'];
+    const genreList = GENRES[locale] || GENRES['en-US'];
     const genre = genreList[Math.floor(rng() * genreList.length)];
     
     // Generate likes based on avgLikes (independent of seed)
@@ -102,11 +101,10 @@ function generateSongs(locale, seed, page, pageSize, avgLikes) {
 
 // Generate detailed song info
 function generateSongDetails(locale, songSeed) {
-  const fakerLocale = LOCALES[locale] || 'en_US';
-  faker.seed(songSeed);
-  faker.locale = fakerLocale;
+  const fakerInstance = FAKER_LOCALES[locale] || fakerEN_US;
+  fakerInstance.seed(songSeed);
   
-  const review = faker.lorem.paragraphs(3);
+  const review = fakerInstance.lorem.paragraphs(3);
   
   return { review };
 }
