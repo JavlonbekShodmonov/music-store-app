@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Store Showcase</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+        }
+        
+        .toolbar {
+            background: #1a1a1a;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            border-bottom: 1px solid #333;
+            flex-wrap: wrap;
+        }
+        
+        .toolbar-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .toolbar-group label {
+            font-size: 12px;
+            color: #aaa;
+            text-transform: uppercase;
+        }
+        
+        .toolbar-group select,
+        .toolbar-group input {
+            padding: 8px 12px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .toolbar-group button {
+            padding: 8px 16px;
+            background: #1db954;
+            border: none;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .toolbar-group button:hover {
+            background: #1ed760;
+        }
+        
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
+        
+        .view-toggle button {
+            padding: 8px 16px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .view-toggle button.active {
+            background: #1db954;
+            border-color: #1db954;
+        }
+        
+        .content {
+            padding: 20px;
+        }
+        
+        /* Table View */
+        .table-view {
+            display: none;
+        }
+        
+        .table-view.active {
+            display: block;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        thead {
+            background: #1a1a1a;
+        }
+        
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #333;
+        }
+        
+        tbody tr {
+            border-bottom: 1px solid #222;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        tbody tr:hover {
+            background: #1a1a1a;
+        }
+        
+        td {
+            padding: 15px;
+        }
+        
+        .expanded-content {
+            background: #1a1a1a;
+            padding: 20px;
+            display: none;
+        }
+        
+        .expanded-content.show {
+            display: block;
+        }
+        
+        .expanded-inner {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .cover-container {
+            flex-shrink: 0;
+        }
+        
+        .album-cover {
+            width: 300px;
+            height: 300px;
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .cover-bg {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+        }
+        
+        .cover-text {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.9));
+        }
+        
+        .cover-text h3 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .cover-text p {
+            font-size: 16px;
+            color: #aaa;
+        }
+        
+        .song-details {
+            flex: 1;
+        }
+        
+        .play-button {
+            padding: 12px 24px;
+            background: #1db954;
+            border: none;
+            color: #fff;
+            border-radius: 24px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        
+        .play-button:hover {
+            background: #1ed760;
+        }
+        
+        .play-button.playing {
+            background: #ff4444;
+        }
+        
+        .review {
+            line-height: 1.6;
+            color: #ccc;
+        }
+        
+        .pagination {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .pagination button {
+            padding: 8px 16px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .pagination button:hover:not(:disabled) {
+            background: #3a3a3a;
+        }
+        
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Gallery View */
+        .gallery-view {
+            display: none;
+        }
+        
+        .gallery-view.active {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .song-card {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 15px;
+            transition: transform 0.2s, background 0.2s;
+            cursor: pointer;
+        }
+        
+        .song-card:hover {
+            background: #252525;
+            transform: translateY(-4px);
+        }
+        
+        .card-cover {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-index {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(0,0,0,0.7);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .card-artist {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .card-info {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .card-likes {
+            margin-top: 8px;
+            font-size: 14px;
+            color: #1db954;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="toolbar">
+        <div class="toolbar-group">
+            <label>Language</label>
+            <select id="locale">
+                <option value="en-US">English (USA)</option>
+                <option value="de-DE">German (Germany)</option>
+                <option value="uk-UA">Ukrainian (Ukraine)</option>
+            </select>
+        </div>
+        
+        <div class="toolbar-group">
+            <label>Seed</label>
+            <input type="number" id="seed" value="12345" min="0">
+        </div>
+        
+        <div class="toolbar-group">
+            <label>&nbsp;</label>
+            <button id="randomSeed">Random Seed</button>
+        </div>
+        
+        <div class="toolbar-group">
+            <label>Avg Likes per Song</label>
+            <input type="number" id="avgLikes" value="5" min="0" max="10" step="0.1">
+        </div>
+        
+        <div class="view-toggle">
+            <button id="tableViewBtn" class="active">Table View</button>
+            <button id="galleryViewBtn">Gallery View</button>
+        </div>
+    </div>
+    
+    <div class="content">
+        <!-- Table View -->
+        <div class="table-view active" id="tableView">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Title</th>
+                        <th>Artist</th>
+                        <th>Album</th>
+                        <th>Genre</th>
+                        <th>Likes</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+            
+            <div class="pagination">
+                <button id="prevPage">Previous</button>
+                <span id="pageInfo">Page 1</span>
+                <button id="nextPage">Next</button>
+            </div>
+        </div>
+        
+        <!-- Gallery View -->
+        <div class="gallery-view" id="galleryView"></div>
+        <div class="loading" id="loading" style="display: none;">Loading more...</div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
